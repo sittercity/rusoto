@@ -11,11 +11,12 @@ use std::error::Error;
 use std::fmt;
 use std::collections::HashMap;
 
-use hyper::Client;
-use hyper::Error as HyperError;
+use reqwest::Client;
+use reqwest::header::{Header, UserAgent};
+use reqwest::StatusCode;
+use reqwest::Method;
+use reqwest::Error as ReqwestError;
 use hyper::header::Headers;
-use hyper::header::UserAgent;
-use hyper::method::Method;
 
 use log::LogLevel::Debug;
 
@@ -31,9 +32,10 @@ lazy_static! {
             env!("CARGO_PKG_VERSION"), RUST_VERSION, env::consts::OS).as_bytes().to_vec()];
 }
 
-#[derive(Clone, Default)]
+// This had Default as well:
+#[derive(Clone)]
 pub struct HttpResponse {
-    pub status: u16,
+    pub status: StatusCode,
     pub body: String,
     pub headers: HashMap<String, String>
 }
@@ -55,8 +57,9 @@ impl fmt::Display for HttpDispatchError {
     }
 }
 
-impl From<HyperError> for HttpDispatchError {
-    fn from(err: HyperError) -> HttpDispatchError {
+// I'm not sure what this conversion is for.
+impl From<ReqwestError> for HttpDispatchError {
+    fn from(err: ReqwestError) -> HttpDispatchError {
         HttpDispatchError { message: err.description().to_string() }
     }
 }
@@ -73,6 +76,7 @@ pub trait DispatchSignedRequest {
 
 impl DispatchSignedRequest for Client {
     fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse, HttpDispatchError> {
+        // TODO: switch this all to reqwest::RequestBuilder:
         let hyper_method = match request.method().as_ref() {
             "POST" => Method::Post,
             "PUT" => Method::Put,
@@ -120,6 +124,7 @@ impl DispatchSignedRequest for Client {
         };
 
         let mut body = String::new();
+        // We should pass back a Read object instead:
         try!(hyper_response.read_to_string(&mut body));
 
         if log_enabled!(Debug) {
@@ -133,7 +138,7 @@ impl DispatchSignedRequest for Client {
         }
 
         Ok(HttpResponse {
-            status: hyper_response.status.to_u16(),
+            status: hyper_response.status().clone(),
             body: body,
             headers: headers
         })
