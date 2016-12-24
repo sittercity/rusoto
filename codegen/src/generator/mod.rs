@@ -46,9 +46,10 @@ pub fn generate_source(service: &Service) -> String {
 fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator: E) -> String where P: GenerateProtocol,  E: GenerateErrorTypes {
     format!(
         "
-        use hyper::Client;
-        use hyper::client::RedirectPolicy;
+        use reqwest::Client;
+        use reqwest::RedirectPolicy;
         use request::DispatchSignedRequest;
+        use reqwest::StatusCode;
         use region;
 
         use std::fmt;
@@ -84,8 +85,8 @@ where P: GenerateProtocol {
 
         impl<P> {type_name}<P, Client> where P: ProvideAwsCredentials {{
             pub fn new(credentials_provider: P, region: region::Region) -> Self {{
-                let mut client = Client::new();
-                client.set_redirect_policy(RedirectPolicy::FollowNone);
+                let mut client = Client::new().unwrap(); // TODO: FIX THIS, handle error
+                client.redirect(RedirectPolicy::none());
                {type_name}::with_request_dispatcher(client, credentials_provider, region)
             }}
         }}
