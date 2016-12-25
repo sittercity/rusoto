@@ -13,7 +13,7 @@ use std::num::ParseIntError;
 use std::str::{FromStr, ParseBoolError};
 use std::str;
 
-use hyper::client::{Client, RedirectPolicy};
+use reqwest::{Client, RedirectPolicy, StatusCode};
 use md5;
 use rusoto_credential::{
     ProvideAwsCredentials,
@@ -9160,8 +9160,8 @@ pub struct S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
 
 impl<P> S3Client<P, Client> where P: ProvideAwsCredentials {
     pub fn new(credentials_provider: P, region: region::Region) -> Self {
-        let mut client = Client::new();
-        client.set_redirect_policy(RedirectPolicy::FollowNone);
+        let mut client = Client::new().unwrap(); // TODO: don't just unwrap
+        client.redirect(RedirectPolicy::none());
         S3Client::with_request_dispatcher(client, credentials_provider, region)
     }
 }
@@ -9189,7 +9189,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(ListObjectVersionsOutputParser::parse_xml("ListObjectVersionsOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9210,7 +9210,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9240,7 +9240,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let mut stack = XmlResponse::new(reader.events().peekable());
         stack.next(); // xml start tag
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(ListObjectsOutputParser::parse_xml("ListBucketResult", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9260,7 +9260,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9280,7 +9280,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9302,7 +9302,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9323,7 +9323,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9361,7 +9361,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 match result.headers.get("ETag") {
                     Some(ref value) => Ok(value.to_string()),
                     None => Err(S3Error::new("Couldn't find etag in response headers."))
@@ -9434,7 +9434,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 let mut put_result = PutObjectOutput::default();
 
                 Ok(put_result)
@@ -9460,7 +9460,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9481,7 +9481,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9501,7 +9501,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketCorsOutputParser::parse_xml("GetBucketCorsOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9522,7 +9522,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9542,7 +9542,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketAclOutputParser::parse_xml("GetBucketAclOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9563,7 +9563,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketLoggingOutputParser::parse_xml("GetBucketLoggingOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9584,7 +9584,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9603,7 +9603,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9623,7 +9623,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9643,7 +9643,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9663,7 +9663,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(NotificationConfigurationParser::parse_xml("NotificationConfiguration", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9686,7 +9686,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         // let result = try!(sign_and_execute(&self.dispatcher, &mut request, try!(self.credentials_provider.credentials())));
         // let status = result.status;
         // match status {
-        //  200 => {
+        //  StatusCode::Ok => {
         //      Ok(try!(DeleteObjectsOutputParser::parse_xml("DeleteObjectsOutput", &mut stack)))
         //  }
         //  _ => { Err(S3Error::new("error")) }
@@ -9706,7 +9706,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9726,7 +9726,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(CopyObjectOutputParser::parse_xml("CopyObjectOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9747,7 +9747,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 // was "ListBucketsOutput"
                 Ok(try!(ListBucketsOutputParser::parse_xml("ListAllMyBucketsResult", &mut stack)))
             }
@@ -9773,7 +9773,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9793,7 +9793,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9823,7 +9823,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let mut result = try!(sign_and_execute(&self.dispatcher, &mut request, try!(self.credentials_provider.credentials())));
         let status = result.status;
         match status {
-            200 => {
+            StatusCode::Ok => {
                 let head_object = try!(S3Client::<P,D>::head_object_from_response(&mut result));
 
                 Ok(head_object)
@@ -9845,7 +9845,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9865,7 +9865,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetObjectTorrentOutputParser::parse_xml("GetObjectTorrentOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9885,7 +9885,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketLifecycleOutputParser::parse_xml("GetBucketLifecycleOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -9920,7 +9920,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 match result.headers.get("Location") {
                     Some(ref value) => Ok(CreateBucketOutput{ location: value.to_string() }),
                     None => Err(S3Error::new("Something went wrong when creating a bucket."))
@@ -9954,7 +9954,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 let mut reader = EventReader::from_str(&result.body);
                 let mut stack = XmlResponse::new(reader.events().peekable());
                 stack.next(); // xml start tag
@@ -9981,7 +9981,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketWebsiteOutputParser::parse_xml("GetBucketWebsiteOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10014,7 +10014,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let mut stack = XmlResponse::new(reader.events().peekable());
         stack.next(); // xml start tag
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(CreateMultipartUploadOutputParser::parse_xml("InitiateMultipartUploadResult", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10038,7 +10038,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let mut result = try!(sign_and_execute(&self.dispatcher, &mut request, try!(self.credentials_provider.credentials())));
         let status = result.status;
         match status {
-            204 => {
+            StatusCode::NoContent => {
                 Ok(())
             }
             _ => {
@@ -10223,7 +10223,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 let s3_object = try!(S3Client::<P,D>::get_object_from_response(&mut result));
 
                 Ok(s3_object)
@@ -10250,7 +10250,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketPolicyOutputParser::parse_xml("GetBucketPolicyOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10270,7 +10270,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketVersioningOutputParser::parse_xml("GetBucketVersioningOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10300,7 +10300,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(ListMultipartUploadsOutputParser::parse_xml("ListMultipartUploadsResult", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10320,7 +10320,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketRequestPaymentOutputParser::parse_xml("GetBucketRequestPaymentOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10340,7 +10340,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10360,7 +10360,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketTaggingOutputParser::parse_xml("GetBucketTaggingOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10394,7 +10394,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
 
         match status {
-            204 => {
+            StatusCode::NoContent => {
                 Ok(AbortMultipartUploadOutput::default())
             }
             _ => { Err(S3Error::new(format!("error, got return code {}", status))) }
@@ -10415,7 +10415,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(PutObjectAclOutputParser::parse_xml("PutObjectAclOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10435,7 +10435,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketLocationOutputParser::parse_xml("GetBucketLocationOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10455,7 +10455,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10475,7 +10475,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(())
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10495,7 +10495,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(NotificationConfigurationDeprecatedParser::parse_xml("NotificationConfigurationDeprecated", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10523,7 +10523,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            200 => {
+            StatusCode::Ok => {
                 let mut reader = EventReader::from_str(&result.body);
                 let mut stack = XmlResponse::new(reader.events().peekable());
                 stack.next(); // xml start tag
@@ -10550,7 +10550,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetObjectAclOutputParser::parse_xml("GetObjectAclOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10568,7 +10568,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
     //  let status = result.status;
     //
     //  match status {
-    //      200 => {
+    //      StatusCode::Ok => {
     //          Ok(true)
     //      }
     //      _ => { Err(S3Error::new("error")) }
@@ -10598,7 +10598,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         let status = result.status;
 
         match status {
-            204 => {
+            StatusCode::NoContent => {
                 Ok(DeleteObjectOutput::default())
                 // Ok(try!(DeleteObjectOutputParser::parse_xml("DeleteObjectOutput", &mut stack)))
             }
@@ -10619,7 +10619,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(RestoreObjectOutputParser::parse_xml("RestoreObjectOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -10638,7 +10638,7 @@ impl<P, D> S3Client<P, D> where P: ProvideAwsCredentials, D: DispatchSignedReque
         stack.next(); // xml start tag
         stack.next();
         match status {
-            200 => {
+            StatusCode::Ok => {
                 Ok(try!(GetBucketReplicationOutputParser::parse_xml("GetBucketReplicationOutput", &mut stack)))
             }
             _ => { Err(S3Error::new(format!("Unexpected HTTP status code {}", status))) }
@@ -11065,7 +11065,7 @@ fn sign_and_execute<D>(dispatcher: &D, request: &mut SignedRequest, creds: AwsCr
     let response = try!(dispatcher.dispatch(request));
     debug!("Sent request to AWS");
 
-    if response.status == 307 {
+    if response.status == StatusCode::TemporaryRedirect {
         debug!("Got a redirect response, resending request.");
         // extract location from response, modify request and re-sign and resend.
         let new_hostname = extract_s3_redirect_location(response).unwrap();
