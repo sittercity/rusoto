@@ -77,7 +77,7 @@ impl GenerateProtocol for RestJsonGenerator {
                 modify_endpoint_prefix = generate_endpoint_modification(service).unwrap_or("".to_owned()),
                 http_method = operation.http.method,
                 error_type = operation.error_type_name(),
-                status_code = operation.http.response_code.unwrap_or(200),
+                status_code = http_code_to_status_code(operation.http.response_code).unwrap_or("StatusCode::Ok".to_string()),
                 ok_response = generate_ok_response(operation, output_type),
                 output_type = output_type,
                 request_uri_formatter = generate_uri_formatter(
@@ -112,6 +112,18 @@ impl GenerateProtocol for RestJsonGenerator {
 
     fn timestamp_type(&self) -> &'static str {
         "f64"
+    }
+}
+
+fn http_code_to_status_code(code: Option<i32>) -> Option<String> {
+    match code {
+        Some(actual_code) => {
+            match actual_code {
+                200 => Some("StatusCode::Ok".to_string()),
+                _ => None,
+            }
+        },
+        None => None,
     }
 }
 

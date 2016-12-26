@@ -2,10 +2,12 @@
 
 use std::fs::File;
 use std::io::Read;
+use std::collections::HashMap;
 
 use super::{DispatchSignedRequest, HttpResponse, HttpDispatchError, SignedRequest};
 use super::{ProvideAwsCredentials, CredentialsError, AwsCredentials};
 use chrono::{Duration, UTC};
+use reqwest::StatusCode;
 
 const ONE_DAY: i64 = 86400;
 
@@ -24,8 +26,11 @@ pub struct MockRequestDispatcher {
 
 impl MockRequestDispatcher {
 	pub fn with_status(status: u16) -> MockRequestDispatcher {
-		let mut response = HttpResponse::default();
-		response.status = status;
+		let response = HttpResponse {
+			status: StatusCode::from_u16(status),
+			body: "".to_string(),
+			headers: HashMap::new(),
+		} ;
 		MockRequestDispatcher { 
 			mock_response: response,
 			request_checker: None

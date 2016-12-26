@@ -50,6 +50,7 @@ fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator
         use reqwest::RedirectPolicy;
         use request::DispatchSignedRequest;
         use reqwest::StatusCode;
+        // use reqwest::Response;
         use region;
 
         use std::fmt;
