@@ -50,7 +50,6 @@ fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator
         use reqwest::RedirectPolicy;
         use request::DispatchSignedRequest;
         use reqwest::StatusCode;
-        // use reqwest::Response;
         use region;
 
         use std::fmt;
@@ -85,10 +84,10 @@ where P: GenerateProtocol {
         }}
 
         impl<P> {type_name}<P, Client> where P: ProvideAwsCredentials {{
-            pub fn new(credentials_provider: P, region: region::Region) -> Self {{
-                let mut client = Client::new().unwrap(); // TODO: FIX THIS, handle error
+            pub fn new(credentials_provider: P, region: region::Region) -> Result<Self, String> {{
+                let mut client = Client::new().expect(\"Couldn't create new request client\");
                 client.redirect(RedirectPolicy::none());
-               {type_name}::with_request_dispatcher(client, credentials_provider, region)
+                return Ok({type_name}::with_request_dispatcher(client, credentials_provider, region));
             }}
         }}
 

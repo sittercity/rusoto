@@ -10,9 +10,10 @@ use std::io::Error as IoError;
 use std::error::Error;
 use std::fmt;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 use reqwest::Client;
-// use reqwest::header::{Header, UserAgent};
+use reqwest::header::{UserAgent, Headers};
 use reqwest::StatusCode;
 use reqwest::Method;
 use reqwest::Error as ReqwestError;
@@ -27,8 +28,8 @@ include!(concat!(env!("OUT_DIR"), "/user_agent_vars.rs"));
 // Use a lazy static to cache the default User-Agent header
 // because it never changes once it's been computed.
 lazy_static! {
-    static ref DEFAULT_USER_AGENT: Vec<Vec<u8>> = vec![format!("rusoto/{} rust/{} {}",
-            env!("CARGO_PKG_VERSION"), RUST_VERSION, env::consts::OS).as_bytes().to_vec()];
+    static ref DEFAULT_USER_AGENT: String = format!("rusoto/{} rust/{} {}",
+            env!("CARGO_PKG_VERSION"), RUST_VERSION, env::consts::OS);
 }
 
 // This had Default as well:
@@ -75,32 +76,32 @@ pub trait DispatchSignedRequest {
 
 impl DispatchSignedRequest for Client {
     fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse, HttpDispatchError> {
-        // TODO: switch this all to reqwest::RequestBuilder:
-        let hyper_method = match request.method().as_ref() {
-            "POST" => Method::Post,
-            "PUT" => Method::Put,
-            "DELETE" => Method::Delete,
-            "GET" => Method::Get,
-            "HEAD" => Method::Head,
-            v => return Err(HttpDispatchError { message: format!("Unsupported HTTP verb {}", v) })
-
+        // TODO: be more graceful for using the builder:
+        let hyper_method = match Method::from_str(request.method().as_ref()) {
+            Ok(method) => method,
+            Err(e) => return Err(HttpDispatchError { message: format!("Unsupported HTTP verb. {}", e) }),
         };
-
-        // translate the headers map to a format Hyper likes
-        // let mut hyper_headers = Headers::new();
-        // for h in request.headers().iter() {
-        //     hyper_headers.set_raw(h.0.to_owned(), h.1.to_owned());
-        // }
-
-        // Add a default user-agent header if one is not already present.
-        // if !hyper_headers.has::<UserAgent>() {
-        //     hyper_headers.set_raw("user-agent".to_owned(), DEFAULT_USER_AGENT.clone());
-        // }
-
         let mut final_uri = format!("https://{}{}", request.hostname(), request.canonical_path());
         if !request.canonical_query_string().is_empty() {
             final_uri = final_uri + &format!("?{}", request.canonical_query_string());
         }
+
+        let mut request_builder = self.request(hyper_method.clone(), &final_uri);
+
+        request_builder = match request.payload() {
+            None => request_builder,
+            Some(payload_contents) => request_builder.body(payload_contents),
+        };
+
+        // translate the headers map to a format Hyper likes
+        let mut hyper_headers = Headers::new();
+        for h in request.headers().iter() {
+            hyper_headers.set_raw(h.0.to_owned(), h.1.to_owned());
+        }
+        request_builder = request_builder.headers(hyper_headers.clone());
+
+        // TODO: overwrite.  Is that the default?
+        request_builder = request_builder.header(UserAgent(DEFAULT_USER_AGENT.to_string().clone()));
 
         if log_enabled!(Debug) {
             let payload = request.payload().map(|mut payload_bytes| {
@@ -112,15 +113,12 @@ impl DispatchSignedRequest for Client {
             });
 
             debug!("Full request: \n method: {}\n final_uri: {}\n payload: {:?}\nHeaders:\n", hyper_method, final_uri, payload);
-            // for h in hyper_headers.iter() {
-            //     debug!("{}:{}", h.name(), h.value_string());
-            // }
+            for h in hyper_headers.iter() {
+                debug!("{}:{}", h.name(), h.value_string());
+            }
         }
 
-        let mut hyper_response = match request.payload() {
-            None => try!(self.request(hyper_method, &final_uri).body("").send()),
-            Some(payload_contents) => try!(self.request(hyper_method, &final_uri).body(payload_contents).send()),
-        };
+        let mut hyper_response = try!(request_builder.send());
 
         let mut body = String::new();
         // We should pass back a Read object instead:
@@ -129,12 +127,6 @@ impl DispatchSignedRequest for Client {
         if log_enabled!(Debug) {
             debug!("Response body:\n{}", body);
         }
-
-        // let mut headers: HashMap<String, String> = HashMap::new();
-
-        // for header in hyper_response.headers.iter() {
-        //     headers.insert(header.name().to_string(), header.value_string());
-        // }
 
         Ok(HttpResponse {
             status: hyper_response.status().clone(),
