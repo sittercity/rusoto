@@ -101,7 +101,7 @@ impl DispatchSignedRequest for Client {
         request_builder = request_builder.headers(hyper_headers.clone());
 
         // TODO: overwrite.  Is that the default?
-        request_builder = request_builder.header(UserAgent(DEFAULT_USER_AGENT.to_string().clone()));
+        request_builder = request_builder.header(UserAgent(DEFAULT_USER_AGENT.clone()));
 
         if log_enabled!(Debug) {
             let payload = request.payload().map(|mut payload_bytes| {
