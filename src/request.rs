@@ -5,7 +5,7 @@
 extern crate lazy_static;
 
 use std::env;
-use std::io::Read;
+use std::io::{self, Read};
 use std::io::Error as IoError;
 use std::error::Error;
 use std::fmt;
@@ -33,11 +33,18 @@ lazy_static! {
 }
 
 // This had Default as well:
-#[derive(Clone)]
-pub struct HttpResponse {
+// #[derive(Clone)]
+pub struct HttpResponse<T> {
     pub status: StatusCode,
-    pub body: String,
-    pub headers: HashMap<String, String>
+    pub headers: HashMap<String, String>,
+    pub body: T
+}
+
+impl<T: Read> HttpResponse<T> {
+    #[inline]
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.body.read(buf)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -70,12 +77,12 @@ impl From<IoError> for HttpDispatchError {
     }
 }
 
-pub trait DispatchSignedRequest {
-    fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse, HttpDispatchError>;
+pub trait DispatchSignedRequest: Read {
+    fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse<Read>, HttpDispatchError>;
 }
 
 impl DispatchSignedRequest for Client {
-    fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse, HttpDispatchError> {
+    fn dispatch(&self, request: &SignedRequest) -> Result<HttpResponse<Read>, HttpDispatchError> {
         // TODO: be more graceful for using the builder:
         let hyper_method = match Method::from_str(request.method().as_ref()) {
             Ok(method) => method,
@@ -130,7 +137,7 @@ impl DispatchSignedRequest for Client {
 
         Ok(HttpResponse {
             status: hyper_response.status().clone(),
-            body: body,
+            body: hyper_response.response,
             headers: HashMap::new()
         })
 
