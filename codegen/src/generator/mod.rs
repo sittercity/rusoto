@@ -53,7 +53,8 @@ fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator
     // Initial capacity is a bit of a guess from looking at the end size:
     let mut service_code = String::with_capacity(969984);
     service_code.push_str(
-        "#[allow(warnings)]
+        "
+        #[allow(warnings)]
         use hyper::Client;
         use hyper::client::RedirectPolicy;
         use request::DispatchSignedRequest;
@@ -75,6 +76,8 @@ fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator
 
 fn generate_client<P>(service: &Service, protocol_generator: &P) -> String
     where P: GenerateProtocol {
+    // If the struct name is changed, the links in each service documentation should change.
+    // See Github issue ___.
     format!(
         "/// A client for the {service_name} API.
         pub struct {type_name}<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {{
