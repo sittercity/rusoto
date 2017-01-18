@@ -53,8 +53,7 @@ fn generate<P, E>(service: &Service, protocol_generator: P, error_type_generator
     // Initial capacity is a bit of a guess from looking at the end size:
     let mut service_code = String::with_capacity(969984);
     service_code.push_str(
-        "#[allow(warnings)]
-        use hyper::Client;
+        "//use hyper::Client;
         use hyper::status::StatusCode;
         use request::DispatchSignedRequest;
         use region;
@@ -84,6 +83,7 @@ fn generate_client<P>(service: &Service, protocol_generator: &P) -> String
         }}
 
         impl<P, D> {type_name}<P, D> where P: ProvideAwsCredentials, D: DispatchSignedRequest {{
+            /// Create new {service_name} client.
             pub fn new(request_dispatcher: D, credentials_provider: P, region: region::Region) -> Self {{
                   {type_name} {{
                     credentials_provider: credentials_provider,
@@ -175,7 +175,7 @@ fn generate_types<P>(service: &Service, protocol_generator: &P) -> String
         if let Some(ref docs) = shape.documentation {
             parts.push(format!("#[doc=\"{}\"]", docs.replace("\\","\\\\").replace("\"", "\\\"")));
         }
-
+        parts.push(format!("/// Type definition for {}", type_name));
         match shape.shape_type {
             ShapeType::Structure => parts.push(generate_struct(service, &type_name, shape, protocol_generator)),
             ShapeType::Map => parts.push(generate_map(&type_name, shape)),

@@ -122,6 +122,7 @@ impl GenerateErrorTypes for XmlErrorTypes {
     fn generate_error_from_body_impl(&self, operation_name: &str, operation: &Operation) -> String {
         format!("
             impl {type_name} {{
+                /// Parse {type_name} from response body
                 pub fn from_body(body: &str) -> {type_name} {{
                     let mut reader = EventReader::new(body.as_bytes());
                     let mut stack = XmlResponse::new(reader.events().peekable());
@@ -179,6 +180,7 @@ impl GenerateErrorTypes for JsonErrorTypes {
     fn generate_error_from_body_impl(&self, operation_name: &str, operation: &Operation) -> String {
         format!("
             impl {type_name} {{
+                /// Parse {type_name} from response body
                 pub fn from_body(body: &str) -> {type_name} {{
                     match from_str::<SerdeJsonValue>(body) {{
                         Ok(json) => {{
