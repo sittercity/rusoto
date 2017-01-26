@@ -114,6 +114,7 @@ all = [
 	   	"sqs",
 	   	"ssm",
 	   	"storagegateway",
+	   	"sts",
 	   	"swf",
 	   	"waf",
 	   	"workspaces"
@@ -171,6 +172,7 @@ sns = []
 sqs = []
 ssm = []
 storagegateway = []
+sts = []
 swf = []
 unstable = ["rusoto_codegen/unstable", "rusoto_credential/unstable", "serde_derive"]
 waf = []
