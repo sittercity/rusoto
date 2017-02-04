@@ -61,6 +61,11 @@ version = "0.8.19"
 env_logger = "0.4.0"
 rand = "^0.3.14"
 
+[workspace]
+members = [
+	"services/acm"
+]
+
 [features]
 all = [
 		"acm",
