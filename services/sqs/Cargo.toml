@@ -1,0 +1,59 @@
+[package]
+authors = [
+    "Anthony DiMarco <ocramida@gmail.com>",
+    "Jimmy Cuadra <jimmy@jimmycuadra.com>",
+    "Matthew Mayer <matthewkmayer@gmail.com>",
+    "Nikita Pekin <contact@nikitapek.in>"
+]
+build = "build.rs"
+description = "AWS SQS"
+documentation = "http://rusoto.github.io/rusoto/rusoto/index.html"
+keywords = ["AWS", "Amazon"]
+license = "MIT"
+name = "rusoto_sqs"
+repository = "https://github.com/rusoto/rusoto"
+version = "0.22.0"
+
+[build-dependencies.rusoto_codegen]
+default-features = true
+version = ">= 0.6.0"
+path = "../../codegen"
+
+[build-dependencies]
+rustc_version = "0.1.7"
+rayon = "0.6.0"
+
+[dependencies]
+chrono = "0.2.21"
+hyper = "0.10.0"
+hyper-native-tls = "0.2.1"
+lazy_static = "0.2.1"
+log = "0.3.6"
+md5 = "0.3.2"
+regex = "0.2.1"
+ring = "0.6"
+rustc-serialize = "0.3.19"
+serde = "0.8.0"
+serde_json = "0.8.0"
+time = "0.1.35"
+url = "1.2.0"
+xml-rs = "0.3"
+
+[dependencies.rusoto]
+path = "../../"
+version = "0.22.0"
+
+[dependencies.clippy]
+optional = true
+version = "0.0"
+
+[dependencies.rusoto_credential]
+version = "0.4.0"
+
+[dev-dependencies]
+env_logger = "0.4.0"
+rand = "^0.3.14"
+
+[features]
+all = ["sqs"]
+sqs = []

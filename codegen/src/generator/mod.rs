@@ -114,14 +114,14 @@ fn generate<P, E>(writer: &mut FileWriter, service: &Service, protocol_generator
     writeln!(writer, "#[allow(warnings)]
         use hyper::Client;
         use hyper::status::StatusCode;
-        use request::DispatchSignedRequest;
-        use region;
+        use rusoto::request::{{DispatchSignedRequest, HttpDispatchError}};
+        use rusoto::region;
 
         use std::fmt;
         use std::error::Error;
-        use request::HttpDispatchError;
-        use rusoto_credential::{{CredentialsError, ProvideAwsCredentials}};
+        use rusoto::{{CredentialsError, ProvideAwsCredentials}};
     ")?;
+    // was use rusoto_credential::{{CredentialsError, ProvideAwsCredentials}};
 
     protocol_generator.generate_prelude(writer, service)?;
     generate_types(writer, service, &protocol_generator)?;

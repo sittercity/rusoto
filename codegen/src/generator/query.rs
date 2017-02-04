@@ -55,12 +55,12 @@ impl GenerateProtocol for QueryGenerator {
             "use std::str::FromStr;
             use xml::EventReader;
             use xml::reader::ParserConfig;
-            use param::{{Params, ServiceParams}};
-            use signature::SignedRequest;
+            use rusoto::param::{{Params, ServiceParams}};
+            use rusoto::signature::SignedRequest;
             use xml::reader::XmlEvent;
-            use xmlutil::{{Next, Peek, XmlParseError, XmlResponse}};
-            use xmlutil::{{characters, end_element, start_element, skip_tree, peek_at_name}};
-            use xmlerror::*;
+            use rusoto::xmlutil::{{Next, Peek, XmlParseError, XmlResponse}};
+            use rusoto::xmlutil::{{characters, end_element, start_element, skip_tree, peek_at_name}};
+            use rusoto::xmlerror::*;
 
             enum DeserializerNext {{
                 Close,

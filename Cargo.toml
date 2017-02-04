@@ -63,7 +63,8 @@ rand = "^0.3.14"
 
 [workspace]
 members = [
-	"services/acm"
+	"services/acm",
+	"services/sqs"
 ]
 
 [features]

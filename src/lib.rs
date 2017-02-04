@@ -80,13 +80,13 @@ pub use request::{DispatchSignedRequest, HttpResponse, HttpDispatchError, TlsErr
 pub use signature::SignedRequest;
 pub use request::default_tls_client;
 
-mod param;
-mod region;
-mod request;
-mod xmlerror;
-mod xmlutil;
+pub mod param;
+pub mod region;
+pub mod request;
+pub mod xmlerror;
+pub mod xmlutil;
 mod serialization;
-#[macro_use] mod signature;
+#[macro_use] pub mod signature;
 
 #[cfg(test)]
 mod mock;
@@ -186,8 +186,6 @@ pub mod s3;
 pub mod sdb;
 #[cfg(feature = "sns")]
 pub mod sns;
-#[cfg(feature = "sqs")]
-pub mod sqs;
 #[cfg(feature = "ssm")]
 pub mod ssm;
 #[cfg(feature = "storagegateway")]
