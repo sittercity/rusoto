@@ -88,8 +88,8 @@ pub mod xmlutil;
 mod serialization;
 #[macro_use] pub mod signature;
 
-#[cfg(test)]
-mod mock;
+// #[cfg(test)]
+pub mod mock;
 
 #[cfg(feature = "autoscaling")]
 pub mod autoscaling;

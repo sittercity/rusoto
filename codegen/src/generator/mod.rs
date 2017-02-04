@@ -112,6 +112,9 @@ fn generate<P, E>(writer: &mut FileWriter, service: &Service, protocol_generator
           E: GenerateErrorTypes {
 
     writeln!(writer, "#[allow(warnings)]
+    #[cfg(test)]
+    use rusoto::mock;
+    
         use hyper::Client;
         use hyper::status::StatusCode;
         use rusoto::request::{{DispatchSignedRequest, HttpDispatchError}};

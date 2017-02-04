@@ -11,8 +11,8 @@ mod test {
     use std::collections::HashMap;
     use sqs::{SqsClient, SendMessageRequest, ReceiveMessageRequest, MessageAttributeValue};
 
-    use super::super::{Region, SignedRequest};
-    use super::super::mock::*;
+    use rusoto::{Region, SignedRequest};
+    use rusoto::mock::*;
 
     extern crate env_logger;
 
