@@ -9,7 +9,24 @@ use std::fs::File;
 use rusoto_codegen::{Service, generate};
 use rayon::prelude::*;
 
-fn generate_cargo_toml(service_name: String, output_path: &Path, crate_version: &str) {
+fn generate_lib_rs(service_name: &str, output_path: &Path) {
+	let mut f = File::create(&output_path.join(format!("{}/src/lib.rs", service_name))).expect("Could not create lib.rs");
+	let file_contents = format!("
+		#![crate_name = \"rusoto_{service_name}\"]
+		#![crate_type = \"lib\"]
+		pub mod {service_name};
+
+		extern crate hyper;
+		extern crate rusoto_credential;
+		extern crate rusoto_core;
+		extern crate xml;
+	",
+	service_name=service_name);
+
+	let _ = f.write_all(file_contents.as_bytes());
+}
+
+fn generate_cargo_toml(service_name: &str, output_path: &Path, crate_version: &str) {
 	let mut f = File::create(&output_path.join(format!("{}/Cargo.toml", service_name))).expect("Could not create Cargo.toml");
 
 	let file_contents = format!("
@@ -45,7 +62,7 @@ version = \"0.4.0\"
 		service_name=service_name,
 		crate_version=crate_version);
 
-	f.write_all(file_contents.as_bytes());
+	let _ = f.write_all(file_contents.as_bytes());
 }
 
 // expand to use cfg!() so codegen only gets run for services
@@ -66,9 +83,7 @@ macro_rules! services {
 
 fn main() {
     let services_dir = "services";
-    let src_dir = "src";
     let services_path = Path::new(&services_dir).to_owned();
-    let src_path = Path::new(&src_dir).to_owned();
 
     let services = services! {
         ["acm", "2015-12-08"],
@@ -128,16 +143,12 @@ fn main() {
     };
 
     let count: usize = services.into_par_iter().map(|service| {
-		generate_cargo_toml(service.name.to_owned(), &services_path.clone(), "0.22.0");
+    	let service_name = service.name.to_owned();
+		generate_cargo_toml(&service_name, &services_path.clone(), "0.22.0");
+		generate_lib_rs(&service_name, &services_path.clone());
     	generate(service, &services_path.clone());
 
     }).count();
     println!("\nGenerated {:?} services.\n", count);
 
-    let codegen_dir = Path::new("codegen");
-
-    // avoid unnecessary recompiles when used as a crates.io dependency
-    if codegen_dir.exists() {
-        println!("cargo:rerun-if-changed=codegen");
-    }
 }
