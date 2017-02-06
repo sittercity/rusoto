@@ -9,16 +9,43 @@ use std::fs::File;
 use rusoto_codegen::{Service, generate};
 use rayon::prelude::*;
 
-/// Parses and generates variables used to construct a User-Agent.
-///
-/// This is used to create a User-Agent header string resembling
-/// `rusoto/x.y.z rust/x.y.z <os>`.
-fn generate_user_agent_vars(output_path: &Path) {
-    let rust_version = rustc_version::version();
-    let mut f = File::create(&output_path.join("user_agent_vars.rs"))
-            .expect("Could not create user agent file");
-    f.write_all(format!("static RUST_VERSION: &'static str = \"{}\";", rust_version).as_bytes())
-            .expect("Unable to write user agent");
+fn generate_cargo_toml(service_name: String, output_path: &Path, crate_version: &str) {
+	let mut f = File::create(&output_path.join(format!("{}/Cargo.toml", service_name))).expect("Could not create Cargo.toml");
+
+	let file_contents = format!("
+[package]
+authors = [
+    \"Anthony DiMarco <ocramida@gmail.com>\",
+    \"Jimmy Cuadra <jimmy@jimmycuadra.com>\",
+    \"Matthew Mayer <matthewkmayer@gmail.com>\",
+    \"Nikita Pekin <contact@nikitapek.in>\"
+]
+
+description = \"AWS SQS\"
+documentation = \"http://rusoto.github.io/rusoto/rusoto/index.html\"
+keywords = [\"AWS\", \"Amazon\"]
+license = \"MIT\"
+name = \"rusoto_{service_name}\"
+repository = \"https://github.com/rusoto/rusoto\"
+version = \"{crate_version}\"
+
+[dependencies]
+hyper = \"0.10.0\"
+hyper-native-tls = \"0.2.1\"
+xml-rs = \"0.3\"
+
+[dependencies.rusoto_core]
+path = \"../../rusoto_core\"
+version = \"0.22.0\"
+
+[dependencies.rusoto_credential]
+path = \"../../credential\"
+version = \"0.4.0\"
+		",
+		service_name=service_name,
+		crate_version=crate_version);
+
+	f.write_all(file_contents.as_bytes());
 }
 
 // expand to use cfg!() so codegen only gets run for services
@@ -100,10 +127,12 @@ fn main() {
         ["workspaces", "2015-04-08"]
     };
 
-    let count: usize = services.into_par_iter().map(|service| generate(service, &services_path.clone())).count();
-    println!("\nGenerated {:?} services.\n", count);
+    let count: usize = services.into_par_iter().map(|service| {
+		generate_cargo_toml(service.name.to_owned(), &services_path.clone(), "0.22.0");
+    	generate(service, &services_path.clone());
 
-    generate_user_agent_vars(&src_path);
+    }).count();
+    println!("\nGenerated {:?} services.\n", count);
 
     let codegen_dir = Path::new("codegen");
 

@@ -4,3 +4,5 @@ Cargo.lock
 testfile.zip
 *.pyc
 venv
+services/*/Cargo.toml
+services/*/src/*.rs

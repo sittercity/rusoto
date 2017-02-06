@@ -119,7 +119,7 @@ fn generate<P, E>(writer: &mut FileWriter, service: &Service, protocol_generator
         use std::fmt;
         use std::error::Error;
         use rusoto_core::request::{{DispatchSignedRequest, HttpDispatchError}};
-        use rusoto_core::region;        
+        use rusoto_core::region;
         use rusoto_credential::{{CredentialsError, ProvideAwsCredentials}};
     ")?;
     // was use rusoto_credential::{{CredentialsError, ProvideAwsCredentials}};
