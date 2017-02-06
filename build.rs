@@ -2,7 +2,6 @@ extern crate rustc_version;
 extern crate rusoto_codegen;
 extern crate rayon;
 
-use std::env;
 use std::path::Path;
 use std::io::Write;
 use std::fs::File;
@@ -39,8 +38,10 @@ macro_rules! services {
 }
 
 fn main() {
-    let out_dir = env::var_os("OUT_DIR").expect("OUT_DIR not specified");
-    let out_path = Path::new(&out_dir).to_owned();
+    let services_dir = "services";
+    let src_dir = "src";
+    let services_path = Path::new(&services_dir).to_owned();
+    let src_path = Path::new(&src_dir).to_owned();
 
     let services = services! {
         ["acm", "2015-12-08"],
@@ -99,10 +100,10 @@ fn main() {
         ["workspaces", "2015-04-08"]
     };
 
-    let count: usize = services.into_par_iter().map(|service| generate(service, &out_path.clone())).count();
+    let count: usize = services.into_par_iter().map(|service| generate(service, &services_path.clone())).count();
     println!("\nGenerated {:?} services.\n", count);
 
-    generate_user_agent_vars(&out_path);
+    generate_user_agent_vars(&src_path);
 
     let codegen_dir = Path::new("codegen");
 

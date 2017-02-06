@@ -47,8 +47,8 @@ impl Service {
 }
 
 pub fn generate(service: Service, output_path: &Path) -> i32 {
-    let botocore_destination_path = output_path.join(format!("{}_botocore.rs", service.name));
-    let serde_destination_path = output_path.join(format!("{}.rs", service.name));
+    let botocore_destination_path = output_path.join(format!("{}/src/{}_botocore.rs", service.name, service.name));
+    let serde_destination_path = output_path.join(format!("{}/src/{}.rs", service.name, service.name));
     let botocore_service_data_path = Path::new(BOTOCORE_DIR)
         .join(format!("{}/{}/service-2.json", service.name, service.protocol_date));
 

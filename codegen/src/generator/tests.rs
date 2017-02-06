@@ -41,9 +41,9 @@ fn generate_tests_body(service: &Service) -> Option<String> {
         let tests_str = test_bodies.join("\n\n");
 
         Some(format!("
-                use rusoto::mock::*;
+                use rusoto_core::mock::*;
                 use super::*;
-                use rusoto::Region as rusoto_region;
+                use rusoto_core::Region as rusoto_region;
 
                 {test_bodies}",
                      test_bodies = tests_str))

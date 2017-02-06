@@ -27,7 +27,6 @@ use signature::SignedRequest;
 
 // Pulls in the statically generated rustc version.
 include!(concat!(env!("OUT_DIR"), "/user_agent_vars.rs"));
-
 // Use a lazy static to cache the default User-Agent header
 // because it never changes once it's been computed.
 lazy_static! {

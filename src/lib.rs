@@ -43,26 +43,27 @@
 //!     },
 //! }
 
-extern crate chrono;
-extern crate hyper;
-extern crate hyper_native_tls;
-#[macro_use] extern crate lazy_static;
-#[macro_use] extern crate log;
-extern crate md5;
-extern crate regex;
-extern crate ring;
-extern crate rusoto_credential;
-extern crate rustc_serialize;
-extern crate serde;
-extern crate serde_json;
-extern crate time;
-extern crate url;
-extern crate xml;
+//extern crate chrono;
+//extern crate hyper;
+//extern crate hyper_native_tls;
+// #[macro_use] extern crate lazy_static;
+// #[macro_use] extern crate log;
+// extern crate md5;
+// extern crate regex;
+// extern crate ring;
+// extern crate rusoto_credential;
+// extern crate rustc_serialize;
+// extern crate serde;
+// extern crate serde_json;
+// extern crate time;
+// extern crate url;
+// extern crate xml;
 
-#[cfg(feature = "serde_derive")]
-#[macro_use]
-extern crate serde_derive;
+// #[cfg(feature = "serde_derive")]
+// #[macro_use]
+// extern crate serde_derive;
 
+/*
 pub use region::{ParseRegionError, Region};
 pub use rusoto_credential::{
     AwsCredentials,
@@ -75,21 +76,21 @@ pub use rusoto_credential::{
     ProvideAwsCredentials,
     DefaultCredentialsProvider,
     DefaultCredentialsProviderSync,
-};
-pub use request::{DispatchSignedRequest, HttpResponse, HttpDispatchError, TlsError};
-pub use signature::SignedRequest;
-pub use request::default_tls_client;
+};*/
+//pub use request::{DispatchSignedRequest, HttpResponse, HttpDispatchError, TlsError};
+//pub use signature::SignedRequest;
+//pub use request::default_tls_client;
 
-pub mod param;
-pub mod region;
-pub mod request;
-pub mod xmlerror;
-pub mod xmlutil;
-mod serialization;
-#[macro_use] pub mod signature;
+//pub mod param;
+//pub mod region;
+//pub mod request;
+//pub mod xmlerror;
+//pub mod xmlutil;
+//mod serialization;
+//#[macro_use] pub mod signature;
 
 // #[cfg(test)]
-pub mod mock;
+//pub mod mock;
 
 #[cfg(feature = "autoscaling")]
 pub mod autoscaling;
@@ -158,8 +159,6 @@ pub mod importexport;
 pub mod inspector;
 #[cfg(feature = "iot")]
 pub mod iot;
-#[cfg(feature = "kinesis")]
-pub mod kinesis;
 #[cfg(feature = "kms")]
 pub mod kms;
 #[cfg(feature = "lambda")]

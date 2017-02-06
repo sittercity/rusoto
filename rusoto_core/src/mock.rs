@@ -4,7 +4,7 @@ use std::io::Read;
 use std::collections::HashMap;
 
 use super::{DispatchSignedRequest, HttpResponse, HttpDispatchError, SignedRequest};
-use super::{ProvideAwsCredentials, CredentialsError, AwsCredentials};
+use rusoto_credential::{ProvideAwsCredentials, CredentialsError, AwsCredentials};
 use chrono::{Duration, UTC};
 use hyper::status::StatusCode;
 

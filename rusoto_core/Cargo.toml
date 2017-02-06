@@ -1,0 +1,45 @@
+[package]
+name = "rusoto_core"
+version = "0.22.0"
+authors = ["Anthony DiMarco <ocramida@gmail.com>"]
+build = "build.rs"
+
+[dependencies]
+lazy_static = "0.2.1"
+hyper = "0.10.0"
+hyper-native-tls = "0.2.1"
+log = "0.3.6"
+url = "1.2.0"
+time = "0.1.35"
+ring = "0.6"
+rustc-serialize = "0.3.19"
+serde = "0.8.0"
+xml-rs = "0.3"
+chrono = "0.2.21"
+
+[dependencies.serde_codegen]
+optional = true
+version = "0.8.0"
+
+[dependencies.rusoto_credential]
+default-features = false
+path = "../credential"
+version = ">= 0.4.0"
+
+[build-dependencies]
+rustc_version = "0.1.7"
+rayon = "0.6.0"
+
+#[build-dependencies.rusoto_codegen]
+#default-features = false
+#path = "codegen"
+#version = ">= 0.6.0"
+
+#[features]
+#default = ["rusoto_codegen/serde_codegen", "serde_codegen"]
+
+#[workspace]
+#members = [
+#	"services/acm",
+#	"services/sqs"
+#]

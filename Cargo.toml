@@ -26,28 +26,16 @@ path = "codegen"
 version = ">= 0.6.0"
 
 [dependencies]
-chrono = "0.2.21"
-hyper = "0.10.0"
-hyper-native-tls = "0.2.1"
-lazy_static = "0.2.1"
 log = "0.3.6"
 md5 = "0.3.2"
 regex = "0.2.1"
-ring = "0.6"
-rustc-serialize = "0.3.19"
-serde = "0.8.0"
 serde_json = "0.8.0"
-time = "0.1.35"
-url = "1.2.0"
-xml-rs = "0.3"
+chrono = "0.2.21"
+hyper = "0.10.0"
 
 [dependencies.clippy]
 optional = true
 version = "0.0"
-
-[dependencies.rusoto_credential]
-path = "credential"
-version = "0.4.0"
 
 [dependencies.serde_codegen]
 optional = true
@@ -64,7 +52,8 @@ rand = "^0.3.14"
 [workspace]
 members = [
 	"services/acm",
-	"services/sqs"
+	"services/sqs",
+	"rusoto_core"
 ]
 
 [features]
@@ -165,7 +154,7 @@ lambda = []
 logs = []
 machinelearning = []
 marketplacecommerceanalytics = []
-nightly-testing = ["clippy", "rusoto_codegen/nightly-testing", "rusoto_credential/nightly-testing", "unstable"]
+nightly-testing = ["clippy", "rusoto_codegen/nightly-testing",  "unstable"]
 opsworks = []
 redshift = []
 rds = []
@@ -178,6 +167,6 @@ sqs = []
 ssm = []
 storagegateway = []
 swf = []
-unstable = ["rusoto_codegen/unstable", "rusoto_credential/unstable", "serde_derive"]
+unstable = ["rusoto_codegen/unstable", "serde_derive"]
 waf = []
 workspaces = []
