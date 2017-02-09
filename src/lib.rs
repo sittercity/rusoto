@@ -189,6 +189,8 @@ pub mod sns;
 pub mod ssm;
 #[cfg(feature = "storagegateway")]
 pub mod storagegateway;
+#[cfg(feature = "sts")]
+pub mod sts;
 #[cfg(feature = "swf")]
 pub mod swf;
 #[cfg(feature = "waf")]
