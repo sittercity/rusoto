@@ -10,31 +10,49 @@ pub struct RestJsonGenerator;
 impl GenerateProtocol for RestJsonGenerator {
     fn generate_methods(&self, writer: &mut FileWriter, service: &Service) -> IoResult {
         for (operation_name, operation) in service.operations.iter() {
-            let input_type = operation.input_shape();
+
             let output_type = operation.output_shape_or("()");
 
-            // Retrieve the `Shape` for the input for this operation.
-            let input_shape = &service.shapes[input_type];
+            // pieces that aren't needed if there's no input shape
+            let mut request_uri_formatter = "".to_owned();
+            let mut load_params = "".to_owned();
+            let mut encode_input = "".to_owned();
+            let mut load_payload = false;
 
-            // Construct a list of format strings which will be used to format
-            // the request URI, mapping the input struct to the URI arguments.
-            let member_uri_strings = generate_shape_member_uri_strings(input_shape);
+            if let Some(ref input) = operation.input {
 
-            // A boolean controlling whether or not the payload should be loaded
-            // into the request.
-            // According to the AWS SDK documentation, requests should only have
-            // a request body for operations with ANY non-URI or non-query
-            // parameters.
-            let load_payload = input_shape.members
-                .as_ref()
-                .unwrap()
-                .iter()
-                .any(|(_, member)| member.location.is_none());
 
-            // Construct a list of strings which will be used to load request
-            // parameters from the input struct into a `Params` vec, which will
-            // then be added to the request.
-            let member_param_strings = generate_shape_member_param_strings(input_shape);
+                // Retrieve the `Shape` for the input for this operation.
+                let input_shape = &service.shapes[&input.shape];
+
+                // Construct a list of format strings which will be used to format
+                // the request URI, mapping the input struct to the URI arguments.
+                let member_uri_strings = generate_shape_member_uri_strings(input_shape);
+
+                // A boolean controlling whether or not the payload should be loaded
+                // into the request.
+                // According to the AWS SDK documentation, requests should only have
+                // a request body for operations with ANY non-URI or non-query
+                // parameters.
+                load_payload = input_shape.members
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .any(|(_, member)| member.location.is_none());
+
+                // Construct a list of strings which will be used to load request
+                // parameters from the input struct into a `Params` vec, which will
+                // then be added to the request.
+                let member_param_strings = generate_shape_member_param_strings(input_shape);
+
+                request_uri_formatter = generate_uri_formatter(
+                    &generate_snake_case_uri(&operation.http.request_uri),
+                    &member_uri_strings
+                );
+
+                load_params = generate_params_loading_string(&member_param_strings);
+                encode_input = generate_encoding_string(load_payload);
+            }
 
             writeln!(writer,"
                 {documentation}
@@ -73,7 +91,7 @@ impl GenerateProtocol for RestJsonGenerator {
                 }}
                 ",
                 documentation = generate_documentation(operation).unwrap_or("".to_owned()),
-                method_signature = generate_method_signature(operation, input_shape),
+                method_signature = generate_method_signature(service, operation),
                 endpoint_prefix = service.signing_name(),
                 modify_endpoint_prefix = generate_endpoint_modification(service).unwrap_or("".to_owned()),
                 http_method = operation.http.method,
@@ -81,13 +99,10 @@ impl GenerateProtocol for RestJsonGenerator {
                 status_code = http_code_to_status_code(operation.http.response_code),
                 ok_response = generate_ok_response(operation, output_type),
                 output_type = output_type,
-                request_uri_formatter = generate_uri_formatter(
-                    &generate_snake_case_uri(&operation.http.request_uri),
-                    &member_uri_strings
-                ),
+                request_uri_formatter = request_uri_formatter,
                 load_payload = generate_payload_loading_string(load_payload),
-                load_params = generate_params_loading_string(&member_param_strings),
-                encode_input = generate_encoding_string(load_payload),
+                load_params = load_params,
+                encode_input = encode_input,
             )?
         }
         Ok(())
@@ -159,15 +174,19 @@ fn generate_endpoint_modification(service: &Service) -> Option<String> {
 
 // IoT defines a lot of empty (and therefore unnecessary) request shapes
 // don't clutter method signatures with them
-fn generate_method_signature(operation: &Operation, shape: &Shape) -> String {
-    if shape.members.is_some() && !shape.members.as_ref().unwrap().is_empty() {
-        format!("pub fn {method_name}(&self, input: &{input_type})",
-                method_name = operation.name.to_snake_case(),
-                input_type = operation.input_shape())
-    } else {
-        format!("pub fn {method_name}(&self)",
-                method_name = operation.name.to_snake_case())
+fn generate_method_signature(service: &Service, operation: &Operation) -> String {
+    if let Some(ref input) = operation.input {
+        let shape = &service.shapes[&input.shape];
+        if shape.members.is_some() && !shape.members.as_ref().unwrap().is_empty() {
+            return format!("pub fn {method_name}(&self, input: &{input_type})",
+                    method_name = operation.name.to_snake_case(),
+                    input_type = input.shape)
+        }
     }
+
+    format!("pub fn {method_name}(&self)",
+            method_name = operation.name.to_snake_case())
+
 }
 
 fn generate_encoding_string(load_payload: bool) -> String {

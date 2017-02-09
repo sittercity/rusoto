@@ -62,9 +62,10 @@ fn generate_response_parse_test(service: &Service, response: Response) -> Option
     let operation = maybe_operation.unwrap();
     let request_params;
     let request_constructor;
-    if operation.input.is_some() {
+
+    if let Some(ref input) = operation.input {
         request_constructor = format!("let request = {request_type}::default();",
-                                      request_type = operation.input_shape());
+                                      request_type = input.shape);
         request_params = "&request".to_string();
     } else {
         request_constructor = "".to_string();

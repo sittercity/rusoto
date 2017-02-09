@@ -90,9 +90,9 @@ fn generate_endpoint_modification(service: &Service) -> Option<String> {
 }
 
 fn generate_method_signature(operation: &Operation) -> String {
-    if operation.input.is_some() {
+    if let Some(ref input) = operation.input {
         format!("pub fn {method_name}(&self, input: &{input_type}) ",
-                input_type = operation.input_shape(),
+                input_type = input.shape,
                 method_name = operation.name.to_snake_case())
     } else {
         format!("pub fn {method_name}(&self) ",
