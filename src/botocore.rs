@@ -207,7 +207,7 @@ impl Member {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct XmlNamespace {
     pub prefix: Option<String>,
     pub uri: String,

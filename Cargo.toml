@@ -5,26 +5,16 @@ authors = [
     "Matthew Mayer <matthewkmayer@gmail.com>",
     "Nikita Pekin <contact@nikitapek.in>"
 ]
-build = "build.rs"
+#build = "build.rs"
 description = "AWS SDK for Rust"
 documentation = "http://rusoto.github.io/rusoto/rusoto/index.html"
-exclude = [".gitignore", ".travis.yml", "docgen.sh", "helpers/**/*", "codegen/**/*"]
+exclude = [".gitignore", ".travis.yml", "docgen.sh", "helpers/**/*"]
 keywords = ["AWS", "Amazon"]
 license = "MIT"
 name = "rusoto"
 readme = "README.md"
 repository = "https://github.com/rusoto/rusoto"
 version = "0.22.0"
-
-[build-dependencies]
-env_logger = "0.4.0"
-rustc_version = "0.1.7"
-rayon = "0.6.0"
-
-[build-dependencies.rusoto_codegen]
-default-features = false
-path = "codegen"
-version = ">= 0.6.0"
 
 [dependencies]
 log = "0.3.6"
@@ -33,17 +23,26 @@ regex = "0.2.1"
 serde_json = "0.8.0"
 chrono = "0.2.21"
 hyper = "0.10.0"
+Inflector = "0.7.0"
+lazy_static = "0.2.1"
+serde = "0.8.0"
+rustc_version = "0.1.7"
+rayon = "0.6.0"
+env_logger = "0.4.0"
 
 [dependencies.clippy]
 optional = true
 version = "0.0"
+
+[dependencies.rusoto_core]
+path = "rusoto_core"
+version = "0.22.0"
 
 [dependencies.serde_codegen]
 optional = true
 version = "0.8.0"
 
 [dependencies.serde_derive]
-optional = true
 version = "0.8.19"
 
 [dev-dependencies]
@@ -51,125 +50,98 @@ env_logger = "0.4.0"
 rand = "^0.3.14"
 
 [workspace]
-members = [
-	"services/acm",
-	"services/sqs",
-	"rusoto_core"
+members=[
+"services/ecs",
+"services/lambda",
+"services/polly",
+"services/codebuild",
+"services/snowball",
+"services/acm",
+"services/shield",
+"services/efs",
+"services/kinesis",
+"services/glacier",
+"services/elb",
+"services/elastictranscoder",
+"services/support",
+"services/sms",
+"services/logs",
+"services/cloudtrail",
+"services/ec2",
+"services/cloudsearchdomain",
+"services/pinpoint",
+"services/elasticbeanstalk",
+"services/cloudfront",
+"services/budgets",
+"services/ds",
+"services/cognito-sync",
+"services/dms",
+"services/emr",
+"services/firehose",
+"services/es",
+"services/elbv2",
+"services/apigateway",
+"services/cloudwatch",
+"services/codedeploy",
+"services/events",
+"services/stepfunctions",
+"services/waf-regional",
+"services/kms",
+"services/iot-data",
+"services/application-autoscaling",
+"services/cognito-idp",
+"services/workspaces",
+"services/cloudformation",
+"services/cloudsearch",
+"services/cloudhsm",
+"services/machinelearning",
+"services/lightsail",
+"services/sts",
+"services/codepipeline",
+"services/autoscaling",
+"services/waf",
+"services/route53",
+"services/gamelift",
+"services/importexport",
+"services/marketplacecommerceanalytics",
+"services/route53domains",
+"services/swf",
+"services/health",
+"services/cognito-identity",
+"services/inspector",
+"services/rds",
+"services/ssm",
+"services/appstream",
+"services/devicefarm",
+"services/servicecatalog",
+"services/dynamodb",
+"services/sdb",
+"services/directconnect",
+"services/opsworkscm",
+"services/meteringmarketplace",
+"services/iam",
+"services/ses",
+"services/opsworks",
+"services/dynamodbstreams",
+"services/sqs",
+"services/datapipeline",
+"services/xray",
+"services/discovery",
+"services/s3",
+"services/codecommit",
+"services/ecr",
+"services/rekognition",
+"services/iot",
+"services/elasticache",
+"services/batch",
+"services/storagegateway",
+"services/config",
+"services/sns",
+"services/kinesisanalytics",
+"services/redshift"
 ]
 
 [features]
-all = [
-		"acm",
-	   	"autoscaling",
-	   	"cloudformation",
-	   	"cloudfront",
-	   	"cloudhsm",
-	   	"cloudsearch",
-	   	"cloudtrail",
-	   	"cloudwatch",
-	   	"codecommit",
-	   	"codedeploy",
-	   	"codepipeline",
-	   	"cognito-identity",
-	   	"config",
-	   	"datapipeline",
-	   	"devicefarm",
-	   	"directconnect",
-	   	"ds",
-	   	"dynamodb",
-	   	"dynamodbstreams",
-	   	"ec2",
-	   	"ecr",
-	   	"ecs",
-	   	"elasticache",
-	   	"elasticbeanstalk",
-	   	"elastictranscoder",
-	   	"elb",
-	   	"elbv2",
-	   	"emr",
-	   	"events",
-	   	"firehose",
-	   	"iam",
-	   	"importexport",
-	   	"inspector",
-	   	"iot",
-	   	"kinesis",
-	   	"kms",
-	   	"lambda",
-	   	"logs",
-	   	"machinelearning",
-	   	"marketplacecommerceanalytics",
-	   	"opsworks",
-	   	"redshift",
-	   	"rds",
-	   	"route53",
-	   	"route53domains",
-	   	"s3",
-	   	"sdb",
-	   	"sns",
-	   	"sqs",
-	   	"ssm",
-	   	"storagegateway",
-	   	"sts",
-	   	"swf",
-	   	"waf",
-	   	"workspaces"
-	]
-acm = []
-autoscaling = []
-cloudformation = []
-cloudfront = []
-cloudhsm = []
-cloudsearch = []
-cloudtrail = []
-cloudwatch = []
-codecommit = []
-codedeploy = []
-codepipeline = []
-cognito-identity = []
-config = []
-datapipeline = []
-default = ["rusoto_codegen/serde_codegen", "serde_codegen"]
-devicefarm = []
-directconnect = []
-ds = []
-dynamodb = []
-dynamodbstreams = []
-ec2 = []
-ecr = []
-ecs = []
-elasticache = []
-elasticbeanstalk = []
-elastictranscoder = []
-elb = []
-elbv2 = []
-emr = []
-events = []
-firehose = []
-iam = []
-importexport = []
-inspector = []
-iot = []
-kinesis = []
-kms = []
-lambda = []
-logs = []
-machinelearning = []
-marketplacecommerceanalytics = []
-nightly-testing = ["clippy", "rusoto_codegen/nightly-testing",  "unstable"]
-opsworks = []
-redshift = []
-rds = []
-route53 = []
-route53domains = []
-s3 = []
-sdb = []
-sns = []
-sqs = []
-ssm = []
-storagegateway = []
-sts = []
-swf = []
-unstable = ["rusoto_codegen/unstable", "serde_derive"]
-waf = []
-workspaces = []
+default = ["serde_codegen"]
+nightly-testing = ["clippy", "unstable"]
+unstable = []
